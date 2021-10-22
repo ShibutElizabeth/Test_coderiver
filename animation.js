@@ -1,11 +1,10 @@
-let ctx;
-let canvas;
+let ctx, canvas;
 let lastTime = 0, time = 0;
 const a = 0.001;
-const y0 = 100, y1 = 600;
-let width = 30, height = 30;
-let hLast = 0, v0 = 0;
+const lowerBound = 100, upperBound = 600;
+let v0 = 0;
 let down = true, c = false;
+let parameters = {};
 
 function initCanvas(){
     canvas = document.getElementById("canvas2d");
@@ -18,67 +17,79 @@ function initCanvas(){
         alert("can't load context");
         return;
     }
+    setNormalParameters(30 * 1000 * a);
     lastTime = Date.now();
-    render();
+    render(canvas, ctx);
 }
 
 function render(){
     window.requestAnimationFrame(render);
     time = Date.now() - lastTime;
-    let y;
-    if(down) y = falling();
-    else y = jumping();
+    const yPos = down ? falling() : jumping();
+
     ctx.fillStyle = "white";
     ctx.clearRect(0,0, canvas.clientWidth, canvas.clientHeight);
-    ctx.fillRect((canvas.clientWidth-width)/2, y, width, height);
+    ctx.fillRect((canvas.clientWidth - parameters.width) / 2, yPos, parameters.width, parameters.height);
 }
 
 function falling(){
-    let h1 = v0*time + 0.5*a*time*time;
-    let y = y0 + h1;
-    width-= 0.06;
-    height+= 0.12;
-    if(y >= 600){
+    const y = lowerBound + getDeltaHeight();
+    setStretchParameters(-80 * a);
+    if(y >= upperBound){
         down = false;
-        v0 = (1.5*y1 + a *time * time)/(2*time);
-        width = 40;
-        height = 20;
-        lastTime = Date.now();
-        c = true;
+        v0 = (1.5 * upperBound + a *time * time) / (2 * time);
+        startNewJump();
     }
     return y;
 }
 
 function jumping() {
-    let h1 = v0*time - 0.5*a*time*time;
-    let y = y1 - h1;
+    const h1 = getDeltaHeight(-1);
+    const y = upperBound - h1;
+    const deltaBound = getDeltaBound();
     if(c){
-        width = 30;
-        height = 30;
+        setNormalParameters();
         c = false;
     }
-    if(h1 >= 440 || h1 <= 20){
-        width += 0.4;
-        height -= 0.6;
-        if(h1>=450){
-            c= true;
-        }else if(h1 <= 10){
-            width =35;
-            height =25;
-        }
+    if(h1 >= deltaBound || h1 <= lowerBound / 10) setStretchParameters(200 * a);
+    else if(h1 < deltaBound && h1 > lowerBound / 10){
+        if(h1 < deltaBound / 2) setStretchParameters(100 * a);
+        else setStretchParameters(-100 * a);
     }
-    else if(h1 < 440 && h1 > 20){
-        width-=0.1;
-        height+=0.2;
-    }
-    if(h1 < 0){
-        width = 40;
-        height = 20;
-        lastTime = Date.now();
-        hLast = h1;
-        c = true;
-    }
-
+    if(h1 < 0) startNewJump();
     return y;
+}
+
+function startNewJump(){
+    setSquashParameters();
+    lastTime = Date.now();
+    c = true;
+}
+
+function setStretchParameters(k) {
+    if(!k) k = 100 * a;
+    parameters.width += k;
+    parameters.height -= 3 * k;
+}
+
+function setNormalParameters(k) {
+    if(!k) k = 30 * 1000 * a;
+    parameters.width = k;
+    parameters.height = k;
+}
+
+function setSquashParameters(k) {
+    if(!k) k = parameters.width + 10 * 1000 * a;
+    parameters.width = k;
+    parameters.height = k / 2;
+}
+
+function getDeltaHeight(sign) {
+    if(!sign) sign = 1;
+    return v0 * time + sign * 0.5 * a * time * time;
+}
+
+function getDeltaBound(){
+    return (upperBound - 1.5 * lowerBound);
 }
 
