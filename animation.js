@@ -19,14 +19,16 @@ function initCanvas(){
     }
     setNormalParameters(30 * 1000 * a);
     lastTime = Date.now();
-    render(canvas, ctx);
+    render();
 }
 
 function render(){
     window.requestAnimationFrame(render);
     time = Date.now() - lastTime;
-    const yPos = down ? falling() : jumping();
+    drawRectBall(down ? falling() : jumping());
+}
 
+function drawRectBall(yPos){
     ctx.fillStyle = "white";
     ctx.clearRect(0,0, canvas.clientWidth, canvas.clientHeight);
     ctx.fillRect((canvas.clientWidth - parameters.width) / 2, yPos, parameters.width, parameters.height);
