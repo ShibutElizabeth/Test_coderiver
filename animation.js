@@ -2,31 +2,42 @@ let ctx;
 let canvas;
 let lastTime = 0;
 let t = 0;
-let c = 0.00072;
+const c = 0.0008;
 let y0 = 100, y1 = 600, width = 30, height = 30;
 let hLast = 0;
 let v0 = 0;
 let down = true;
+
 function initCanvas(){
-    canvas = document.getElementById("canvas");
+    canvas = document.getElementById("canvas2d");
+    if(!canvas) {
+        alert("can't load canvas");
+        return;
+    }
     ctx = canvas.getContext("2d");
+    if(!ctx){
+        alert("can't load context");
+        return;
+    }
     lastTime = Date.now();
     render();
 }
 
 function drawRectBall(x, y, width, height){
-    ctx.fillStyle = "green";
+    ctx.fillStyle = "white";
     ctx.clearRect(0,0, canvas.clientWidth, canvas.clientHeight);
     ctx.fillRect(x, y, width, height);
 }
+
 function render(){
     window.requestAnimationFrame(render);
     t = Date.now() - lastTime;
     let y;
     if(down) y = falling();
     else y = jumping();
-    drawRectBall(canvas.clientWidth/2-15, y, width, height);
+    drawRectBall((canvas.clientWidth-width)/2, y, width, height);
 }
+
 function falling(){
     let h1 = v0*t + 0.5*c*t*t;
     let y = y0 + h1;
