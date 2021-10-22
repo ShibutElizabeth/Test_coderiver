@@ -57,19 +57,19 @@ function jumping() {
         height = 30;
         c = false;
     }
-    if(h1 >= 445 || h1 <= 10){
-        width +=0.2;
-        height -=0.5;
-    }
-    else if(h1 < 445 && h1 > 10){
-        if(h1 < 225){
-            width+=0.1;
-            height-=0.3;
-        }else{
-            width-=0.1;
-            height+=0.3;
+    if(h1 >= 440 || h1 <= 20){
+        width += 0.4;
+        height -= 0.6;
+        if(h1>=450){
+            c= true;
+        }else if(h1 <= 10){
+            width =35;
+            height =25;
         }
-
+    }
+    else if(h1 < 440 && h1 > 20){
+        width-=0.1;
+        height+=0.2;
     }
     if(h1 < 0){
         width = 40;
